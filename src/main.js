@@ -1,17 +1,24 @@
-import { app, BrowserWindow } from 'electron';
+import { app, dialog, BrowserWindow, ipcMain } from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
+import express from 'express';
+import fs from 'fs';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
   app.quit();
 }
 
+const PORT = process.env.PORT || 9090;
+let mainWindow;
+let server;
+let videoURL;
+
 const createWindow = () => {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 800,
-    height: 600,
+    height: 800,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
     },
@@ -28,9 +35,68 @@ const createWindow = () => {
   mainWindow.webContents.openDevTools();
 };
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
+
+function startServer(videoPath) {
+  const appExpress = express();
+  //const videoPath = path.join(__dirname, "video.mp4"); // your large file
+  const port = 3000;
+
+  // Route for streaming video
+  appExpress.get("/video", (req, res) => {
+    fs.stat(videoPath, (err, stats) => {
+      if (err) {
+        return res.sendStatus(404);
+      }
+
+      const range = req.headers.range;
+      if (!range) {
+        // Send entire file if no range is requested
+        res.writeHead(200, {
+          "Content-Length": stats.size,
+          "Content-Type": "video/mp4",
+        });
+        fs.createReadStream(videoPath).pipe(res);
+        return;
+      }
+
+      // Handle partial content (streaming)
+      const parts = range.replace(/bytes=/, "").split("-");
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : stats.size - 1;
+      const chunkSize = end - start + 1;
+
+      res.writeHead(206, {
+        "Content-Range": `bytes ${start}-${end}/${stats.size}`,
+        "Accept-Ranges": "bytes",
+        "Content-Length": chunkSize,
+        "Content-Type": "video/mp4",
+      });
+
+      fs.createReadStream(videoPath, { start, end }).pipe(res);
+    });
+  });
+
+  server = appExpress.listen(port, () => {
+    videoURL = `http://localhost:${port}/video`;
+    console.log("Video server running at:", videoURL);
+  });
+
+}
+
+ipcMain.handle('select-video-file', async () => {
+  const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
+    title: 'Select a Video File',
+    buttonLabel: 'Select',
+    properties: ['openFile'],
+    filters: [
+      { name: 'Videos', extensions: ['mp4', 'mkv', 'avi', 'mov', 'webm'] }
+    ]
+  });
+
+  if (canceled) return null;
+  return filePaths[0];
+});
+
 app.whenReady().then(() => {
   createWindow();
 
