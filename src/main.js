@@ -12,7 +12,6 @@ if (started) {
 const PORT = process.env.PORT || 9090;
 let mainWindow;
 let server;
-let videoURL;
 
 const createWindow = () => {
   // Create the browser window.
@@ -35,11 +34,12 @@ const createWindow = () => {
   mainWindow.webContents.openDevTools();
 };
 
-
 function startServer(videoPath) {
   const appExpress = express();
   //const videoPath = path.join(__dirname, "video.mp4"); // your large file
   const port = 3000;
+
+  let videoURL;
 
   // Route for streaming video
   appExpress.get("/video", (req, res) => {
@@ -80,8 +80,9 @@ function startServer(videoPath) {
     videoURL = `http://localhost:${port}/video`;
     console.log("Video server running at:", videoURL);
   });
-
+  return videoURL;
 }
+
 
 ipcMain.handle('select-video-file', async () => {
   const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
@@ -94,7 +95,8 @@ ipcMain.handle('select-video-file', async () => {
   });
 
   if (canceled) return null;
-  return filePaths[0];
+  return startServer(filePaths[0]);
+
 });
 
 app.whenReady().then(() => {
