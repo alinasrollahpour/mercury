@@ -75,11 +75,12 @@ function startServer(videoPath) {
       fs.createReadStream(videoPath, { start, end }).pipe(res);
     });
   });
+  videoURL = `http://localhost:${port}/video`;
 
   server = appExpress.listen(port, () => {
-    videoURL = `http://localhost:${port}/video`;
     console.log("Video server running at:", videoURL);
   });
+  console.log(`im returning videoURL: ${videoURL}`);
   return videoURL;
 }
 
