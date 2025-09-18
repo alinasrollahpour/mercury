@@ -1,4 +1,4 @@
-import { app, dialog, BrowserWindow, ipcMain } from 'electron';
+import { app, dialog, Menu, BrowserWindow, ipcMain } from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
 import express from 'express';
@@ -22,6 +22,7 @@ const createWindow = () => {
       preload: path.join(__dirname, 'preload.js'),
     },
   });
+  Menu.setApplicationMenu(null);
 
   // and load the index.html of the app.
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
