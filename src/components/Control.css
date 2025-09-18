@@ -1,0 +1,21 @@
+#control-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    border: 2px solid rgba(78, 78, 78, 0.55);
+    border-radius: 20px;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    position: fixed;
+    z-index: 100;
+    width: calc(100% - 40px);
+    height: 100px;
+    left: 20px;
+    bottom: 20px;
+}
+#seek-box {
+    width: calc(100% - 40px);
+    height: 30px;
+}

@@ -27,7 +27,7 @@ export default function App() {
       <button id='open-file' onClick={openFileHandler}>Open a file</button>
     }
     {videoURL &&
-      <div>
+      <div id="frame">
         <Video videoURL={videoURL}
                videoRef={videoRef}
                setCurrentTime={setCurrentTime}

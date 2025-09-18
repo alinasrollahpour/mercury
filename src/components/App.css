@@ -5,8 +5,8 @@
     border: none;
 }
 #main-video {
-    width: 100%;
-    height: 100%;
+    max-width: 100vw;
+    max-height: 100vh;
 }
 
 body {
@@ -17,4 +17,9 @@ div#app {
     background-color: black;
     height: 100%;
     width: 100%;
+}
+#frame {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
