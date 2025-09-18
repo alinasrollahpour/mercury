@@ -1,0 +1,15 @@
+#open-file {
+    color: white;
+    background-color: #3f3f3f;
+    border-radius: 100px;
+    font-size: 40px;
+    width: 300px;
+    height: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#open-file:hover {
+    background-color: #7c3c12;
+}

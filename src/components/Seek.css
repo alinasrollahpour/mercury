@@ -1,5 +1,15 @@
 #seek-container {
     width: 100%;
-    height: 30px;
-    background-color: orangered;
+    height: 6px;
+    background-color: gray;
+    z-index: 150;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+}
+#passed-line {
+    z-index: 200;
+    height: 6px;
+    background-color: orange;
 }

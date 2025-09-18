@@ -1,8 +1,9 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {useState, useRef} from 'react';
 import './App.css';
-import Video from './Video.jsx'
-import Control from './Control.jsx'
+import Video from './Video.jsx';
+import Control from './Control.jsx';
+import Open from './Open.jsx';
 
 export default function App() {
 
@@ -13,21 +14,9 @@ export default function App() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
 
-  async function openFileHandler() {
-    let res = await window.merc.selectVideoFile();
-    setVideoURL(res);
-
-    //res is undefined
-    console.log('$$$ selectVideoFile() has been invoked');
-    console.log(res);
-  }
-
-  return <>
-    {!videoURL &&
-      <button id='open-file' onClick={openFileHandler}>Open a file</button>
-    }
-    {videoURL &&
-      <div id="frame">
+  return <div id="frame">
+    {videoURL ?
+      <div>
         <Video videoURL={videoURL}
                videoRef={videoRef}
                setCurrentTime={setCurrentTime}
@@ -36,10 +25,13 @@ export default function App() {
         />
         <Control setIsPlaying={setIsPlaying}
                  currentTime={currentTime}
+                 setCurrentTime={setCurrentTime}
                  duration={duration}
+
         />
       </div>
-
+      :
+      <Open setVideoURL={setVideoURL} videoURL={videoURL}/>
     }
-  </>
+</div>
 }

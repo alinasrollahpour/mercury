@@ -3,13 +3,18 @@ import path from 'node:path';
 import started from 'electron-squirrel-startup';
 import express from 'express';
 import fs from 'fs';
+import isDev from 'electron-is-dev';
+
+const rootPath = isDev
+  ? app.getAppPath() // In Dev, point to the public folder in your project root
+  : process.resourcesPath // In Prod, point to the public folder in the packaged app resources
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
   app.quit();
 }
 
-const PORT = process.env.PORT || 9090;
+const PORT = process.env.VITE_PORT || 9090;
 let mainWindow;
 let server;
 
@@ -22,6 +27,8 @@ const createWindow = () => {
       preload: path.join(__dirname, 'preload.js'),
     },
   });
+
+  //to hide entire menu
   Menu.setApplicationMenu(null);
 
   // and load the index.html of the app.
@@ -38,9 +45,13 @@ const createWindow = () => {
 function startServer(videoPath) {
   const appExpress = express();
   //const videoPath = path.join(__dirname, "video.mp4"); // your large file
-  const port = 3000;
+
 
   let videoURL;
+
+  //serve static assets
+  console.log('rootPath', rootPath);
+  appExpress.use('/public', express.static(path.join(rootPath, 'public')));
 
   // Route for streaming video
   appExpress.get("/video", (req, res) => {
@@ -76,9 +87,9 @@ function startServer(videoPath) {
       fs.createReadStream(videoPath, { start, end }).pipe(res);
     });
   });
-  videoURL = `http://localhost:${port}/video`;
+  videoURL = `http://localhost:${PORT}/video`;
 
-  server = appExpress.listen(port, () => {
+  server = appExpress.listen(PORT, () => {
     console.log("Video server running at:", videoURL);
   });
   console.log(`im returning videoURL: ${videoURL}`);

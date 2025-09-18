@@ -2,19 +2,28 @@ import React from 'react';
 import './Control.css';
 import Seek from './Seek.jsx';
 
-export default function Control({setIsPlaying, currentTime, duration}) {
+const PORT = import.meta.env.VITE_PORT || 9090;
+const BACKEND_URL = `http://localhost:${PORT}`;
+
+export default function Control(
+  {setIsPlaying, currentTime, setCurrentTime, duration}
+) {
+  console.log('currentTime, Control.jsx', currentTime);
   return <div id="control-box">
     <div id="button-box">
       <button id="paly-pause"
               onClick={() => {
                 setIsPlaying(i => !i)
-              }}
-      >
-        Play/Pause
+              }}>
+        <img src={`${BACKEND_URL}/public/play.svg`} alt="play-pause-image"/>
       </button>
     </div>
     <div id="seek-box">
-      <Seek/>
+      <Seek
+        currentTime={currentTime}
+        duration={duration}
+        setCurrentTime={setCurrentTime}
+      />
     </div>
   </div>
 }
