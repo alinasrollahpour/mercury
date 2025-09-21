@@ -29,6 +29,6 @@ export default function Seek(
   // the seek-container is the parent reference element to calculate seek
   return <div ref={seekRef} id="seek-container" onClick={clickHandler}>
     <div style={{width: `${w()}%`}} id="passed-line"/>
-    <div id="remaining-line"/>
+    <div style={{left: `${w()}%`}} id="seek-button"/>
   </div>
 }

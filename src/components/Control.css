@@ -1,10 +1,5 @@
 #control-box {
-    /*display: flex;*/
-    /*flex-direction: column;*/
-    /*align-items: center;*/
-    /*justify-content: space-evenly;*/
-
-    border: 2px solid rgba(78, 78, 78, 0.55);
+    border: 1px solid rgba(63, 63, 63, 0.55);
     border-radius: 20px;
     background-color: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(10px);
@@ -13,32 +8,54 @@
     width: calc(100% - 40px);
     height: 100px;
     left: 20px;
+    transition: transform 0.5s ease-in-out;
     bottom: 20px;
 }
 #button-box {
-    border: 1px solid rgba(204, 45, 45, 0.55);
+    /*border: 1px solid rgba(204, 45, 45, 0.55);*/
     height: 60%;
 }
 #seek-box {
     width: calc(100% - 40px);
     position: absolute;
     height: 30px;
-    border: solid 1px rgba(39, 178, 91, 0.55);
+    /*border: solid 1px rgba(39, 178, 91, 0.55);*/
     left: 20px;
 }
-button#play-pause {
+
+.ctl-btn {
     background: none;
     height: 50px;
     width: 50px;
     margin-top: 5px;
     position: absolute;
-    left: calc(50% - 25px);
 }
-button#play-pause:hover {
+.ctl-btn:hover {
+    border-radius: 10px;
     background: rgba(108, 68, 54, 0.3);
 }
 
-img#play-pause {
-    height: 30px;
-    width: 30px;
+#play-pause-button {
+    left: calc(50% - 25px);
+}
+
+#forward-button {
+    right: calc(50% - 80px);
+}
+
+#backward-button {
+    left: calc(50% - 80px);
+}
+.time-label {
+    font-family: sans-serif;
+    top: 15px;
+    color: white;
+    font-size: 20px;
+    position: absolute;
+}
+#passed-time {
+    left: 20px;
+}
+#total-time {
+    right: 20px;
 }

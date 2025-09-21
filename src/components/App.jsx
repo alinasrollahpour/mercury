@@ -10,12 +10,24 @@ export default function App() {
   const [videoURL, setVideoURL] = useState();
   const videoRef = useRef(null);
 
-  //null if there is no click, a duration time in seconds, if user ordered
-  const [seekRequest, setSeekRequest] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [isMouseInControlArea, setIsMouseInControlArea] = useState(false);
 
+  //adds event listener to manage isMouseInControlArea
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      const viewportHeight = window.innerHeight;
+      const threshold = viewportHeight - 140; // start of bottom third
+      setIsMouseInControlArea(e.clientY >= threshold);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, []);
 
   return <div id="frame">
     {videoURL ?
@@ -26,7 +38,9 @@ export default function App() {
                setDuration={setDuration}
                isPlaying={isPlaying}
         />
-        <Control videoRef={videoRef}
+        <Control isMouseInControlArea={isMouseInControlArea}
+                 videoRef={videoRef}
+                 isPlaying={isPlaying}
                  setIsPlaying={setIsPlaying}
                  currentTime={currentTime}
                  setCurrentTime={setCurrentTime}
