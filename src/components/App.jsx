@@ -10,9 +10,12 @@ export default function App() {
   const [videoURL, setVideoURL] = useState();
   const videoRef = useRef(null);
 
+  //null if there is no click, a duration time in seconds, if user ordered
+  const [seekRequest, setSeekRequest] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+
 
   return <div id="frame">
     {videoURL ?
@@ -23,7 +26,8 @@ export default function App() {
                setDuration={setDuration}
                isPlaying={isPlaying}
         />
-        <Control setIsPlaying={setIsPlaying}
+        <Control videoRef={videoRef}
+                 setIsPlaying={setIsPlaying}
                  currentTime={currentTime}
                  setCurrentTime={setCurrentTime}
                  duration={duration}
@@ -33,5 +37,5 @@ export default function App() {
       :
       <Open setVideoURL={setVideoURL} videoURL={videoURL}/>
     }
-</div>
+  </div>
 }
