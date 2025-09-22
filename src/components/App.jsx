@@ -1,5 +1,4 @@
-import React, {useEffect} from 'react';
-import {useState, useRef} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import './App.css';
 import Video from './Video.jsx';
 import Control from './Control.jsx';
@@ -10,11 +9,44 @@ export default function App() {
   const [videoURL, setVideoURL] = useState();
   const videoRef = useRef(null);
 
+  const [backgroundColor, setBackgroundColor] = useState('#000000');
+  const [isFullScreen, setIsFullScreen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isMouseInControlArea, setIsMouseInControlArea] = useState(false);
 
+  //handle shortkeys
+  useEffect(() => {
+    function handleKeyDown(event) {
+      if (event.key === 'Enter') {
+        console.log('Enter pressed');
+        //todo: full screen
+
+        if (videoRef.current) {
+          if (isFullScreen) { //already is fullscreen
+            if (document.exitFullscreen) {
+              document.exitFullscreen();
+            }
+          } else {
+            if (document.documentElement.requestFullscreen) {
+              //method to apply fullscreen
+              document.documentElement.requestFullscreen();
+            }
+          }
+        }
+        setIsFullScreen(i => !i);
+      }
+      if ((event.ctrlKey || event.metaKey) && event.key === 'o') {
+        //todo: open file component
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, []);
   //adds event listener to manage isMouseInControlArea
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -29,10 +61,11 @@ export default function App() {
     };
   }, []);
 
-  return <div id="frame">
+  return <div id="frame" style={{ backgroundColor, transition: 'background-color 0.5s ease'}}>
     {videoURL ?
       <div>
-        <Video videoURL={videoURL}
+        <Video setBackgroundColor={setBackgroundColor}
+               videoURL={videoURL}
                videoRef={videoRef}
                setCurrentTime={setCurrentTime}
                setDuration={setDuration}

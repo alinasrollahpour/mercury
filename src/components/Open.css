@@ -1,4 +1,9 @@
-#open-file {
+#open-buttons-container {
+    display: flex;
+    flex-direction: column;
+}
+
+#open-file, #open-url {
     color: white;
     background-color: #3f3f3f;
     border-radius: 100px;
@@ -10,6 +15,56 @@
     justify-content: center;
     align-items: center;
 }
+
+#open-file {
+    background-color: #3f3f3f;
+}
+
+#open-url {
+    margin-top: 20px;
+    background-color: #000000;
+    border: 1px solid #3f3f3f;
+}
+
 #open-file:hover {
     background-color: #7c3c12;
+}
+
+#open-url:hover {
+
+    background-color: #181818;
+}
+
+#input-container {
+    padding-left: 10px;
+    border-radius: 100px;
+    margin: 30px 0;
+    background: none;
+    border: 1px solid #3f3f3f;
+    display: flex;
+    flex-direction: row;
+}
+
+
+#url-input {
+    font-size: 20px;
+    padding: 5px;
+    color: white;
+    background: none;
+    border: none;
+    flex-grow: 1;
+}
+#url-input:focus {
+    outline: none;
+    border: none;
+}
+#submit-url {
+    font-size: 20px;
+    color: white;
+    background-color: #8a3e00;
+    padding: 0px 10px;
+}
+
+#submit-url:hover {
+    background-color: #ff7000;
 }

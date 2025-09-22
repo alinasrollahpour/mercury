@@ -53,6 +53,12 @@
     font-size: 20px;
     position: absolute;
 }
+#prev-button {
+    left: calc(50% - 130px);;
+}
+#next-button {
+    right: calc(50% - 130px);
+}
 #passed-time {
     left: 20px;
 }

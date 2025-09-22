@@ -4,6 +4,7 @@ import started from 'electron-squirrel-startup';
 import express from 'express';
 import fs from 'fs';
 import isDev from 'electron-is-dev';
+import cors from 'cors';
 
 const rootPath = isDev
   ? app.getAppPath() // In Dev, point to the public folder in your project root
@@ -27,7 +28,7 @@ const createWindow = () => {
       preload: path.join(__dirname, 'preload.js'),
     },
   });
-
+  mainWindow.setTitle("Mercury");
   //to hide entire menu
   Menu.setApplicationMenu(null);
 
@@ -46,9 +47,11 @@ function startServer(videoPath) {
   const appExpress = express();
   //const videoPath = path.join(__dirname, "video.mp4"); // your large file
 
-
   let videoURL;
 
+  appExpress.use(cors({
+    origin: /http:\/\/localhost:\d+/
+  }));
   //serve static assets
   console.log('rootPath', rootPath);
   appExpress.use('/public', express.static(path.join(rootPath, 'public')));
@@ -108,8 +111,9 @@ ipcMain.handle('select-video-file', async () => {
   });
 
   if (canceled) return null;
+  //todo: based on filePath[0] change the title of window
+  mainWindow.setTitle(`Mercury: ${filePaths[0]}`);
   return startServer(filePaths[0]);
-
 });
 
 app.whenReady().then(() => {

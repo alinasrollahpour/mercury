@@ -1,7 +1,7 @@
 import React from 'react';
 import './Control.css';
 import Seek from './Seek.jsx';
-import {Play, Pause, Forward, Backward} from './Icons.jsx';
+import {Play, Pause, Forward, Backward, Next, Prev} from './Icons.jsx';
 
 const PORT = import.meta.env.VITE_PORT || 9090;
 const BACKEND_URL = `http://localhost:${PORT}`;
@@ -38,25 +38,34 @@ export default function Control(
   return <div id="control-box"
               style={{transform: isMouseInControlArea ? 'translateY(0px)' : 'translateY(130px)'}}>
     <div id="button-box">
+
       <button className="ctl-btn" id="play-pause-button"
               onClick={() => {
                 setIsPlaying(i => !i)
               }}>
         {isPlaying ? <Pause/> : <Play/> }
-
       </button>
+
       <button className="ctl-btn" id="forward-button"
               onClick={() => seekSeconds(5)}>
         <Forward/>
       </button>
+
       <button className="ctl-btn" id="backward-button"
               onClick={() => seekSeconds(-5)}>
         <Backward/>
       </button>
 
+      <button className="ctl-btn" id="next-button">
+        <Next/>
+      </button>
+      <button className="ctl-btn" id="prev-button">
+        <Prev/>
+      </button>
       <label className="time-label" id="passed-time">
         {convertSecondsToTimeDate(currentTime)}
       </label>
+
       <label className="time-label" id="total-time">
         {convertSecondsToTimeDate(duration)}
       </label>
