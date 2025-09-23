@@ -65,3 +65,9 @@
 #total-time {
     right: 20px;
 }
+#subtitle-button {
+    left: calc(50% - 180px);
+}
+#open-new-file {
+    right: calc(50% - 180px);
+}

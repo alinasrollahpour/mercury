@@ -43,23 +43,33 @@ const createWindow = () => {
   mainWindow.webContents.openDevTools();
 };
 
-function startServer(videoPath) {
-  const appExpress = express();
-  //const videoPath = path.join(__dirname, "video.mp4"); // your large file
+//create the express server
+const appExpress = express();
+//const videoPath = path.join(__dirname, "video.mp4"); // your large file
 
-  let videoURL;
+let videoURL;
+let videoPath = null;
 
-  appExpress.use(cors({
-    origin: /http:\/\/localhost:\d+/
-  }));
-  //serve static assets
-  console.log('rootPath', rootPath);
-  appExpress.use('/public', express.static(path.join(rootPath, 'public')));
+appExpress.use(cors({
+  origin: /http:\/\/localhost:\d+/
+}));
+//serve static assets
+console.log('rootPath', rootPath);
+// appExpress.use('/public', express.static(path.join(rootPath, 'public')));
+// appExpress.get('/video', (req, res) => {
+//   res.status(404).send('Not Found');
+// })
+server = appExpress.listen(PORT, () => {
+  console.log("Video server running at:", videoURL);
+});
 
+function startVideoServer() {
   // Route for streaming video
+  console.log('start video server serving the file at:', videoPath);
   appExpress.get("/video", (req, res) => {
     fs.stat(videoPath, (err, stats) => {
       if (err) {
+        console.error('file not found', err);
         return res.sendStatus(404);
       }
 
@@ -92,9 +102,7 @@ function startServer(videoPath) {
   });
   videoURL = `http://localhost:${PORT}/video`;
 
-  server = appExpress.listen(PORT, () => {
-    console.log("Video server running at:", videoURL);
-  });
+
   console.log(`im returning videoURL: ${videoURL}`);
   return videoURL;
 }
@@ -113,7 +121,8 @@ ipcMain.handle('select-video-file', async () => {
   if (canceled) return null;
   //todo: based on filePath[0] change the title of window
   mainWindow.setTitle(`Mercury: ${filePaths[0]}`);
-  return startServer(filePaths[0]);
+  videoPath = filePaths[0];
+  return startVideoServer();
 });
 
 app.whenReady().then(() => {

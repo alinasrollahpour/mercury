@@ -6,7 +6,7 @@ import Open from './Open.jsx';
 
 export default function App() {
 
-  const [videoURL, setVideoURL] = useState();
+  const [videoURL, setVideoURL] = useState(null);
   const videoRef = useRef(null);
 
   const [backgroundColor, setBackgroundColor] = useState('#000000');
@@ -16,13 +16,24 @@ export default function App() {
   const [duration, setDuration] = useState(0);
   const [isMouseInControlArea, setIsMouseInControlArea] = useState(false);
 
-  //handle shortkeys
+  //util function
+
+  //handle hotkeys
   useEffect(() => {
     function handleKeyDown(event) {
+      //util
+      function seekSeconds(seconds, ref) {
+        if (ref.current) {
+          console.log('inside if in seekSeconds...')
+          const target = ref.current.currentTime + seconds;
+          if (target > 0 && target < duration) {
+            ref.current.currentTime = target;
+          }
+        }
+      }
+
       if (event.key === 'Enter') {
         console.log('Enter pressed');
-        //todo: full screen
-
         if (videoRef.current) {
           if (isFullScreen) { //already is fullscreen
             if (document.exitFullscreen) {
@@ -37,6 +48,18 @@ export default function App() {
         }
         setIsFullScreen(i => !i);
       }
+      if (event.key === ' ') {
+        console.log('Space pressed');
+        setIsPlaying(i => !i);
+      }
+      if (event.key === 'ArrowRight') {
+        console.log('ArrowRight pressed');
+        seekSeconds(+5, videoRef);
+      }
+      if (event.key === 'ArrowLeft') {
+        console.log('ArrowLeft pressed');
+        seekSeconds(-5, videoRef);
+      }
       if ((event.ctrlKey || event.metaKey) && event.key === 'o') {
         //todo: open file component
       }
@@ -46,7 +69,7 @@ export default function App() {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     }
-  }, []);
+  }, [videoRef, videoURL, duration]);
   //adds event listener to manage isMouseInControlArea
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -61,7 +84,7 @@ export default function App() {
     };
   }, []);
 
-  return <div id="frame" style={{ backgroundColor, transition: 'background-color 0.5s ease'}}>
+  return <div id="frame" style={{backgroundColor, transition: 'background-color 0.5s ease'}}>
     {videoURL ?
       <div>
         <Video setBackgroundColor={setBackgroundColor}
@@ -71,7 +94,8 @@ export default function App() {
                setDuration={setDuration}
                isPlaying={isPlaying}
         />
-        <Control isMouseInControlArea={isMouseInControlArea}
+        <Control setVideoURL={setVideoURL}
+                 isMouseInControlArea={isMouseInControlArea}
                  videoRef={videoRef}
                  isPlaying={isPlaying}
                  setIsPlaying={setIsPlaying}

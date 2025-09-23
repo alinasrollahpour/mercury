@@ -1,15 +1,19 @@
 import React from 'react';
 import './Control.css';
 import Seek from './Seek.jsx';
-import {Play, Pause, Forward, Backward, Next, Prev} from './Icons.jsx';
+import {Play, Pause, Forward, Backward, Next, Prev, Subtitle, File} from './Icons.jsx';
 
 const PORT = import.meta.env.VITE_PORT || 9090;
 const BACKEND_URL = `http://localhost:${PORT}`;
 
 export default function Control(
-  {isPlaying, setIsPlaying, currentTime, setCurrentTime, duration, videoRef, isMouseInControlArea}
+  {setVideoURL, isPlaying, setIsPlaying, currentTime, setCurrentTime, duration, videoRef, isMouseInControlArea}
 ) {
   console.log('currentTime, Control.jsx', currentTime);
+
+  function subtitleHandler() {
+    console.log('subtitleHandler');
+  }
 
   //utility function, for example: 66.2 s -> 00:01:06
   function convertSecondsToTimeDate(totalSeconds) {
@@ -43,7 +47,7 @@ export default function Control(
               onClick={() => {
                 setIsPlaying(i => !i)
               }}>
-        {isPlaying ? <Pause/> : <Play/> }
+        {isPlaying ? <Pause/> : <Play/>}
       </button>
 
       <button className="ctl-btn" id="forward-button"
@@ -62,6 +66,16 @@ export default function Control(
       <button className="ctl-btn" id="prev-button">
         <Prev/>
       </button>
+
+      <button className="ctl-btn" id="subtitle-button"
+              onClick={subtitleHandler}>
+        <Subtitle/>
+      </button>
+      <button className="ctl-btn" id="open-new-file"
+              onClick={() => setVideoURL(null)}>
+        <File/>
+      </button>
+
       <label className="time-label" id="passed-time">
         {convertSecondsToTimeDate(currentTime)}
       </label>
