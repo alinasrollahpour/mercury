@@ -14,9 +14,25 @@ export default function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [isMouseInControlArea, setIsMouseInControlArea] = useState(false);
+  const [isMouseInControlArea, setIsMouseInControlArea] = useState(true);
 
-  //util function
+  //todo:
+  function resetAllStates() {
+    setBackgroundColor('#000000');
+    setIsFullScreen(false);
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
+    setIsFullScreen(true);
+    console.log('@@@ resetAllStates invoked');
+  }
+
+  useEffect(() => {
+    if (videoRef.current) {
+      setDuration(videoRef.current.duration);
+      videoRef.current.load();
+    }
+  }, [videoRef, videoURL]);
 
   //handle hotkeys
   useEffect(() => {
@@ -60,8 +76,8 @@ export default function App() {
         console.log('ArrowLeft pressed');
         seekSeconds(-5, videoRef);
       }
-      if ((event.ctrlKey || event.metaKey) && event.key === 'o') {
-        //todo: open file component
+      if (event.key === '=') {
+
       }
     }
 
@@ -93,8 +109,10 @@ export default function App() {
                setCurrentTime={setCurrentTime}
                setDuration={setDuration}
                isPlaying={isPlaying}
+               style={{ width: '100%', height: '100%' }}
         />
-        <Control setVideoURL={setVideoURL}
+        <Control resetAllStates={resetAllStates}
+                 setVideoURL={setVideoURL}
                  isMouseInControlArea={isMouseInControlArea}
                  videoRef={videoRef}
                  isPlaying={isPlaying}
@@ -106,7 +124,7 @@ export default function App() {
         />
       </div>
       :
-      <Open setVideoURL={setVideoURL} videoURL={videoURL}/>
+      <Open resetAllStates={resetAllStates} videoRef={videoRef} setVideoURL={setVideoURL} videoURL={videoURL}/>
     }
   </div>
 }

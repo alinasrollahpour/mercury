@@ -7,7 +7,7 @@ const PORT = import.meta.env.VITE_PORT || 9090;
 const BACKEND_URL = `http://localhost:${PORT}`;
 
 export default function Control(
-  {setVideoURL, isPlaying, setIsPlaying, currentTime, setCurrentTime, duration, videoRef, isMouseInControlArea}
+  {resetAllStates, setVideoURL, isPlaying, setIsPlaying, currentTime, setCurrentTime, duration, videoRef, isMouseInControlArea}
 ) {
   console.log('currentTime, Control.jsx', currentTime);
 
@@ -72,7 +72,7 @@ export default function Control(
         <Subtitle/>
       </button>
       <button className="ctl-btn" id="open-new-file"
-              onClick={() => setVideoURL(null)}>
+              onClick={() => console.log('nothing yet implemented')}>
         <File/>
       </button>
 

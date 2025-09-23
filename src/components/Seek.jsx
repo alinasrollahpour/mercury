@@ -21,6 +21,11 @@ export default function Seek(
     console.log(`#### width: ${width}, e.clientX: ${e.clientX} rect.left ${rect.left}`);
     let targetTime = duration * leftDistance / width;
     console.log('calculated targetTime: ', targetTime);
+    //todo: check if target time is valid number
+    if (Number.isNaN(targetTime)) {
+      console.log('#####target time was NaN');
+      return;
+    }
     vid.currentTime = targetTime;
   }
 

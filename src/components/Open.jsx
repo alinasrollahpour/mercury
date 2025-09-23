@@ -1,13 +1,18 @@
 import React, {useState, useRef} from "react";
 import './Open.css';
 
-export default function Open({setVideoURL}) {
+export default function Open({setVideoURL, videoRef, resetAllStates}) {
   const [URL, setURL] = useState(false);
   const inputRef = useRef(null);
 
   async function openFileHandler() {
     let res = await window.merc.selectVideoFile();
+    resetAllStates();
     setVideoURL(res);
+    if (videoRef.current) {
+      videoRef.current.load();
+      console.log('video element is loaded again');
+    }
   }
 
   async function openURLHandler() {

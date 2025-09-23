@@ -52,6 +52,7 @@ export default function Video(
       crossOrigin="anonymous"
       onTimeUpdate={handleTimeUpdate}
       onLoadedMetadata={handleLoadedMetadata}
+      style={{objectFit: 'cover', height: '100%', width: '100%'}}
     />
     <canvas ref={canvasRef} style={{display: 'none'}}/>
   </>

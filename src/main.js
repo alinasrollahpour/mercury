@@ -6,10 +6,6 @@ import fs from 'fs';
 import isDev from 'electron-is-dev';
 import cors from 'cors';
 
-const rootPath = isDev
-  ? app.getAppPath() // In Dev, point to the public folder in your project root
-  : process.resourcesPath // In Prod, point to the public folder in the packaged app resources
-
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
   app.quit();
@@ -17,10 +13,12 @@ if (started) {
 
 const PORT = process.env.VITE_PORT || 9090;
 let mainWindow;
-let server;
+
+// This variable will hold the path to the currently selected video.
+// It starts as null.
+let videoPath = null;
 
 const createWindow = () => {
-  // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 800,
@@ -29,85 +27,86 @@ const createWindow = () => {
     },
   });
   mainWindow.setTitle("Mercury");
-  //to hide entire menu
   Menu.setApplicationMenu(null);
 
-  // and load the index.html of the app.
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
   } else {
     mainWindow.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
   }
-
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 };
 
-//create the express server
+// 1. Create the express app ONCE.
 const appExpress = express();
-//const videoPath = path.join(__dirname, "video.mp4"); // your large file
-
-let videoURL;
-let videoPath = null;
-
 appExpress.use(cors({
   origin: /http:\/\/localhost:\d+/
 }));
-//serve static assets
-console.log('rootPath', rootPath);
-// appExpress.use('/public', express.static(path.join(rootPath, 'public')));
-// appExpress.get('/video', (req, res) => {
-//   res.status(404).send('Not Found');
-// })
-server = appExpress.listen(PORT, () => {
-  console.log("Video server running at:", videoURL);
-});
 
-function startVideoServer() {
-  // Route for streaming video
-  console.log('start video server serving the file at:', videoPath);
-  appExpress.get("/video", (req, res) => {
-    fs.stat(videoPath, (err, stats) => {
-      if (err) {
-        console.error('file not found', err);
-        return res.sendStatus(404);
-      }
+// In your main process file...
 
-      const range = req.headers.range;
-      if (!range) {
-        // Send entire file if no range is requested
-        res.writeHead(200, {
-          "Content-Length": stats.size,
-          "Content-Type": "video/mp4",
-        });
-        fs.createReadStream(videoPath).pipe(res);
-        return;
-      }
+// 2. Define the /video route ONCE.
+appExpress.get("/video", (req, res) => {
+  if (!videoPath) {
+    console.log("Request for /video, but no file is selected.");
+    return res.status(404).send('No video file selected.');
+  }
 
-      // Handle partial content (streaming)
-      const parts = range.replace(/bytes=/, "").split("-");
-      const start = parseInt(parts[0], 10);
-      const end = parts[1] ? parseInt(parts[1], 10) : stats.size - 1;
-      const chunkSize = end - start + 1;
+  fs.stat(videoPath, (err, stats) => {
+    if (err) {
+      console.error(`File not found at path: ${videoPath}`, err);
+      return res.sendStatus(404);
+    }
 
-      res.writeHead(206, {
-        "Content-Range": `bytes ${start}-${end}/${stats.size}`,
-        "Accept-Ranges": "bytes",
-        "Content-Length": chunkSize,
+    const fileSize = stats.size;
+    const range = req.headers.range;
+
+    if (!range) {
+      // No range header, send the whole file.
+      res.writeHead(200, {
+        "Content-Length": fileSize,
         "Content-Type": "video/mp4",
       });
+      return fs.createReadStream(videoPath).pipe(res);
+    }
 
-      fs.createReadStream(videoPath, { start, end }).pipe(res);
+    const parts = range.replace(/bytes=/, "").split("-");
+    const start = parseInt(parts[0], 10);
+    const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+
+    // --- ⬇️ THIS IS THE FIX ⬇️ ---
+    // Handle cases where the browser asks for a start point beyond the file's size.
+    if (start >= fileSize) {
+      console.warn(
+        `Browser requested an invalid start range (${start}) for a file of size ${fileSize}.`
+      );
+      res.writeHead(416, {
+        "Content-Range": `bytes */${fileSize}`,
+      });
+      return res.end();
+    }
+    // --- ⬆️ END OF FIX ⬆️ ---
+
+    const chunkSize = end - start + 1;
+
+    res.writeHead(206, {
+      "Content-Range": `bytes ${start}-${end}/${fileSize}`,
+      "Accept-Ranges": "bytes",
+      "Content-Length": chunkSize,
+      "Content-Type": "video/mp4",
     });
+
+    fs.createReadStream(videoPath, { start, end }).pipe(res);
   });
-  videoURL = `http://localhost:${PORT}/video`;
+});
+
+// 3. Start the server ONCE.
+appExpress.listen(PORT, () => {
+  console.log(`✅ Video streaming server is running at http://localhost:${PORT}/video`);
+});
 
 
-  console.log(`im returning videoURL: ${videoURL}`);
-  return videoURL;
-}
-
-
+// 4. The IPC handler's only job is to update the videoPath variable.
 ipcMain.handle('select-video-file', async () => {
   const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
     title: 'Select a Video File',
@@ -118,33 +117,32 @@ ipcMain.handle('select-video-file', async () => {
     ]
   });
 
-  if (canceled) return null;
-  //todo: based on filePath[0] change the title of window
-  mainWindow.setTitle(`Mercury: ${filePaths[0]}`);
+  if (canceled || !filePaths || filePaths.length === 0) {
+    return null;
+  }
+
+  // Update the global 'videoPath' variable with the new selection.
   videoPath = filePaths[0];
-  return startVideoServer();
+  console.log(`New video path set to: ${videoPath}`);
+
+  // Update the window title.
+  mainWindow.setTitle(`Mercury: ${path.basename(videoPath)}`);
+
+  // Return the fixed URL to the renderer process.
+  return `http://localhost:${PORT}/video`;
 });
 
-app.whenReady().then(() => {
-  createWindow();
+// --- App Lifecycle Events ---
+app.whenReady().then(createWindow);
 
-  // On OS X it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-    }
-  });
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
+  }
 });
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
 });
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and import them here.
